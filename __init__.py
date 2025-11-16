@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 import datetime
+import json
+import os
 
 
 class ExpenseTracker:
@@ -13,6 +15,10 @@ class ExpenseTracker:
         self.expenses = []
         self.total_expense = 0
         self.salary = 0
+        self.data_file = "expenses_data.json"
+        
+        # Load expenses from file on startup
+        self.load_expenses()
 
         title_label = tk.Label(root, text="Expense Tracker", font=("Helvetica", 18, "bold"), fg="#333", bg="#f7f7f7")
         title_label.pack(pady=10)
@@ -72,7 +78,38 @@ class ExpenseTracker:
         # Add a Delete button for expenses
         self.delete_button = tk.Button(listbox_frame, text="🗑️ Delete Selected", command=self.delete_expense,
                                        bg="#F44336", fg="white", font=("Helvetica", 10, "bold"))
-        self.delete_button.pack(pady=5)  # Placed inside listbox_frame for better grouping
+        self.delete_button.pack(pady=5)
+        
+        # Refresh listbox display
+        self.refresh_listbox()
+        self.calculate_total()
+
+    def load_expenses(self):
+        """Load expenses from JSON file"""
+        try:
+            if os.path.exists(self.data_file):
+                with open(self.data_file, 'r') as file:
+                    self.expenses = json.load(file)
+            else:
+                self.expenses = []
+        except json.JSONDecodeError:
+            messagebox.showerror("Error", "Corrupted data file. Starting fresh.")
+            self.expenses = []
+
+    def save_expenses(self):
+        """Save expenses to JSON file"""
+        try:
+            with open(self.data_file, 'w') as file:
+                json.dump(self.expenses, file, indent=2)
+        except IOError:
+            messagebox.showerror("Error", "Failed to save expenses.")
+
+    def refresh_listbox(self):
+        """Refresh the listbox display"""
+        self.expense_listbox.delete(0, tk.END)
+        for item in self.expenses:
+            formatted = f"₹{item['expense']:.2f} ({item['category']}) : {item['comment']} [{item['date']}]"
+            self.expense_listbox.insert(tk.END, formatted)
 
     def add_expense(self):
         expense = self.expense_entry.get()
@@ -100,13 +137,13 @@ class ExpenseTracker:
         self.expense_category_entry.delete(0, 'end')
         self.comment_entry.delete(0, 'end')
 
-        self.calculate_total()  # Automatically update total after adding an expense
+        self.save_expenses()  # Save to file after adding
+        self.calculate_total()
 
     def calculate_total(self):
         salary = self.salary_entry.get()
         if not salary:
-            # Only show error if salary is explicitly being calculated, not on expense add
-            if self.expenses:  # If expenses exist, still show total expenses
+            if self.expenses:
                 self.total_expense = sum(item['expense'] for item in self.expenses)
                 self.total_label.config(text=f"Total Expenses: ₹{self.total_expense:.2f}")
             else:
@@ -122,10 +159,9 @@ class ExpenseTracker:
         self.total_expense = sum(item['expense'] for item in self.expenses)
         remaining = self.salary - self.total_expense
 
-        # Dynamic coloring for remaining balance
         if remaining < 0:
             remaining_color = "red"
-        elif remaining < self.salary * 0.20:  # Less than 20% of salary remaining
+        elif remaining < self.salary * 0.20:
             remaining_color = "orange"
         else:
             remaining_color = "green"
@@ -139,11 +175,12 @@ class ExpenseTracker:
             messagebox.showwarning("No Selection", "Please select an expense to delete.")
             return
 
-        for index in selected_indices[::-1]:  # Delete from end to avoid index issues
+        for index in selected_indices[::-1]:
             self.expense_listbox.delete(index)
             del self.expenses[index]
 
-        self.calculate_total()  # Recalculate total after deletion
+        self.save_expenses()  # Save to file after deletion
+        self.calculate_total()
 
 
 if __name__ == "__main__":
