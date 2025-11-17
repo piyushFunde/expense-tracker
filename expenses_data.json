@@ -4,5 +4,11 @@
     "category": "milk",
     "comment": "online",
     "date": "2025-11-16 23:06"
+  },
+  {
+    "expense": 100.0,
+    "category": "Food",
+    "comment": "online",
+    "date": "2025-11-17 21:54"
   }
 ]
