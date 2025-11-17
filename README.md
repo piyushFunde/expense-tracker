@@ -1,34 +1,31 @@
+# 💸 Expense Tracker Pro
 
-# 💸 Expense Tracker
-
-A simple and intuitive desktop application to track your daily expenses, manage your budget, and visualize your spending patterns.
+A modern, professional desktop application to track your daily expenses, manage your budget, and visualize your spending patterns. Built with **CustomTkinter** for a sleek, contemporary UI.
 
 ## ✨ Features
 
-✅ **Add Expenses** - Record expenses with amount, category, and comments  
+✅ **Modern UI Design** - Built with CustomTkinter for professional look  
+✅ **Dark/Light Mode Toggle** - Switch themes with one click  
+✅ **Add Expenses** - Record expenses with amount, category dropdown, and comments  
+✅ **Professional Treeview Table** - View all expenses in organized columns (Amount, Category, Comment, Date)  
 ✅ **Data Persistence** - Automatically saves expenses to JSON file  
 ✅ **Budget Tracking** - Compare expenses against your salary  
-✅ **Color-Coded Status** - Visual feedback on remaining balance  
-✅ **Delete Expenses** - Remove unwanted expense entries  
+✅ **Financial Summary Panel** - Shows total, remaining, percentage, status, and top category  
 ✅ **Real-time Calculations** - Instant total expense and remaining balance updates  
+✅ **Status Bar** - Real-time notifications for all actions  
+✅ **Color-Coded Status** - Visual feedback on budget health  
 ✅ **Timestamp Logging** - Auto-timestamp for every transaction  
+✅ **Category Dropdown** - Select from pre-defined categories  
+✅ **Responsive Layout** - Two-column design that adapts to window size  
+✅ **Interactive Buttons** - Hover effects on all buttons  
 
 ## 📋 Installation
 
 ### Requirements
 - Python 3.7 or higher
+- CustomTkinter
 - tkinter (included with Python)
 
-### Setup
-
-1. **Navigate to project folder:**
-```bash
-cd c:\Users\funde\OneDrive\Pictures\Documents\Documents\PROGRAMING FILE\expense-tracker
-```
-
-2. **No additional dependencies required!**
-   - tkinter comes built-in with Python
-   - Uses only standard library modules (json, datetime, os)
 
 ## 🚀 Usage
 
@@ -47,24 +44,38 @@ python3 __init__.py
 
 #### 1️⃣ **Add Expense**
    - Enter the amount in rupees (₹)
-   - Select a category (e.g., Food, Transport, Entertainment)
-   - Add optional comments
+   - Select a category from the dropdown menu
+   - Add optional comments/notes
    - Click "➕ Add Expense"
-   - Expense automatically saves to file
+   - Expense automatically saves and appears in the table
 
 #### 2️⃣ **Track Budget**
-   - Enter your monthly salary in "Salary Info" section
+   - Enter your monthly salary in "Salary Information" section
    - Click "📊 Calculate Total"
-   - View total expenses and remaining balance
-   - Balance color changes based on status:
-     - 🟢 **Green** - More than 20% remaining (Healthy)
-     - 🟠 **Orange** - Between 0-20% remaining (Low)
-     - 🔴 **Red** - Overspent (Over budget)
+   - View comprehensive financial summary:
+     - 💷 Total Expenses
+     - 💰 Remaining Balance
+     - 📊 Spending Percentage
+     - 🏆 Top Spending Category
+   - Status indicator shows budget health:
+     - 🟢 **Green (Healthy)** - More than 20% remaining
+     - 🟠 **Orange (Low)** - Between 0-20% remaining
+     - 🔴 **Red (Over Budget)** - Overspent
 
 #### 3️⃣ **Manage Expenses**
-   - Select an expense from the "Expense Log" list
+   - View all expenses in the Treeview table with columns:
+     - **Amount (₹)** - Transaction amount
+     - **Category** - Expense category
+     - **Comment** - Notes/description
+     - **Date & Time** - Transaction timestamp
+   - Select an expense from the table
    - Click "🗑️ Delete Selected" to remove it
    - Changes automatically saved
+
+#### 4️⃣ **Toggle Theme**
+   - Click "🌙 Dark Mode" button in header to switch themes
+   - App saves preference for next session
+   - Choose between Light and Dark modes
 
 ## 💾 Data Storage
 
@@ -80,13 +91,13 @@ python3 __init__.py
     "expense": 150.50,
     "category": "Food",
     "comment": "Lunch at restaurant",
-    "date": "2025-11-16 14:30"
+    "date": "2025-11-17 14:30"
   },
   {
     "expense": 500.00,
     "category": "Transport",
     "comment": "Monthly fuel",
-    "date": "2025-11-16 09:15"
+    "date": "2025-11-17 09:15"
   }
 ]
 ```
@@ -96,39 +107,85 @@ python3 __init__.py
 ```
 expense-tracker/
 │
-├── __init__.py              # Main application file
+├── __init__.py              # Main application file (CustomTkinter implementation)
 ├── expenses_data.json       # Auto-generated data file (created on first use)
 ├── README.md               # Documentation (this file)
-└── .gitignore             # (Optional) Exclude data files from version control
+└── .gitignore             # Exclude unnecessary files from version control
 ```
 
 ## 🎨 UI Components
 
-### Main Window
-- **Title**: 💸 Expense Tracker
-- **Size**: 500x600 pixels
-- **Theme**: Light gray background (#f7f7f7)
+### Header
+- **Title**: 💸 Expense Tracker Pro
+- **Subtitle**: "Manage your finances with ease"
+- **Theme Toggle**: 🌙 Dark Mode button (top-right)
 
-### Sections
-1. **Add Expense** (Green frame)
-   - Amount input
-   - Category input
-   - Comments input
-   - Add button
+### Two-Column Layout
+**Left Column:**
+1. **📝 Add New Expense** (Card)
+   - Amount input field
+   - Category dropdown menu
+   - Comment input field
+   - Add Expense button
 
-2. **Salary Info** (Blue frame)
-   - Salary input
-   - Calculate button
+2. **💰 Salary Information** (Card)
+   - Salary input field
+   - Calculate Total button
 
-3. **Total Display**
-   - Shows total expenses and remaining balance
-   - Color-coded (Green/Orange/Red)
+3. **📈 Financial Summary** (Card)
+   - Total Expenses
+   - Remaining Balance
+   - Spending Percentage
+   - Budget Status
+   - Top Category
 
-4. **Expense Log** (White frame)
+**Right Column:**
+4. **📋 Expense History** (Card)
+   - Professional Treeview table with 4 columns
    - Scrollable list of all expenses
-   - Delete button below list
+   - Delete Selected button
+
+### Status Bar
+- **Bottom**: Real-time notifications and status messages
+- Shows actions like "✅ Added ₹150 to Food"
+- Auto-resets to "✅ Ready" after 3 seconds
+
+## 🌈 Theme Modes
+
+### Light Mode (Default)
+- Clean white cards
+- Professional blue primary color
+- Easy on the eyes
+- Great for daytime use
+
+### Dark Mode
+- Dark gray cards on dark background
+- Reduced eye strain
+- Perfect for night use
+- All colors optimized for dark theme
+
+## 🎯 Default Expense Categories
+
+- 🍔 **Food** - Restaurants, groceries
+- 🚗 **Transport** - Fuel, public transport, taxi
+- 🏠 **Housing** - Rent, utilities, maintenance
+- 🎮 **Entertainment** - Movies, games, music
+- 💊 **Health** - Medicine, doctor visits, gym
+- 📚 **Education** - Books, courses, training
+- 👕 **Shopping** - Clothes, accessories, gifts
+- 🔧 **Utilities** - Bills, subscriptions, repairs
+- 🎯 **Other** - Miscellaneous expenses
 
 ## 🔧 Troubleshooting
+
+### ❌ "No module named 'customtkinter'"
+```bash
+# Install CustomTkinter
+pip install customtkinter
+
+# Or upgrade if already installed
+pip install --upgrade customtkinter
+```
 
 ### ❌ Application won't start
 ```bash
@@ -136,17 +193,10 @@ expense-tracker/
 python --version
 
 # Ensure you're in correct directory
-cd "c:\Users\funde\OneDrive\Pictures\Documents\Documents\PROGRAMING FILE\expense-tracker"
+cd "c:\Users\PROGRAMING FILE\expense-tracker"
 
 # Try running with explicit Python 3
 python3 __init__.py
-```
-
-### ❌ "ModuleNotFoundError: No module named 'tkinter'"
-```bash
-# Windows - Reinstall Python with tkinter option
-# Or install via pip
-pip install tk
 ```
 
 ### ❌ JSON file corrupted
@@ -160,45 +210,38 @@ pip install tk
 - Try running as Administrator
 - Check if antivirus is blocking file access
 
-### ❌ Numbers showing as text instead of calculations
-- Ensure you enter valid numbers (123.45)
-- Avoid special characters or letters
-- Use decimal point (.) not comma (,)
+### ❌ Treeview table not showing expenses
+- Click "📊 Calculate Total" to refresh
+- Verify expenses in `expenses_data.json`
+- Try restarting the application
 
-## 📊 Color Coding Explained
+### ❌ Theme toggle not working
+- Restart the application
+- Verify CustomTkinter is properly installed
+- Check Python version (3.7+)
 
-| Balance Status | Color | Meaning |
+## 📊 Color Coding
+
+| Status | Color | Meaning |
 |---|---|---|
-| > 20% remaining | 🟢 Green | Healthy budget, spend wisely |
-| 0-20% remaining | 🟠 Orange | Low budget, be careful |
-| Negative | 🔴 Red | Over budget, exceeded salary |
-| No salary set | ⚫ Gray | Just tracking expenses |
+| 🟢 Healthy | Green | >20% of salary remaining |
+| 🟠 Low Budget | Orange | 0-20% of salary remaining |
+| 🔴 Over Budget | Red | Negative balance (overspent) |
+| ℹ️ No Salary | Gray | Enter salary for analysis |
 
-## 🎯 Expense Categories (Suggestions)
+## 🚀 Future Enhancements
 
-- 🍔 **Food** - Restaurants, groceries
-- 🚗 **Transport** - Fuel, public transport
-- 🏠 **Housing** - Rent, utilities
-- 🎮 **Entertainment** - Movies, games
-- 💊 **Health** - Medicine, doctor visits
-- 📚 **Education** - Books, courses
-- 👕 **Shopping** - Clothes, accessories
-- 💰 **Savings** - Deposits, investments
-- 📱 **Communication** - Phone bills, internet
-
-## 🚀 Future Enhancements (Planned)
-
-🔄 **Upcoming Features:**
-- ✏️ Edit existing expenses
+🔄 **Planned Features:**
+- ✏️ Edit existing expenses (double-click to edit)
 - 📅 Filter by date range or category
 - 📊 Export reports to CSV/PDF
-- 📈 Statistics dashboard with pie charts
+- 📈 Statistics dashboard with pie/bar charts
 - 🎯 Monthly budget limits and alerts
 - 🔁 Recurring expense templates
 - 👥 Multi-user support
-- 🌙 Dark mode theme
 - 🔐 Password protection
-- 💬 Expense notes/receipts
+- 💾 Cloud backup integration
+- 📱 Mobile app version
 
 ## ⚙️ System Requirements
 
@@ -206,10 +249,10 @@ pip install tk
 |---|---|
 | **Python** | 3.7 or higher |
 | **OS** | Windows, macOS, Linux |
-| **RAM** | 50MB minimum |
-| **Disk Space** | 1MB minimum |
-| **Display** | 800x600 minimum resolution |
-| **Dependencies** | None (tkinter included with Python) |
+| **RAM** | 100MB minimum |
+| **Disk Space** | 2MB minimum |
+| **Display** | 900x650 minimum resolution |
+| **Dependencies** | customtkinter, tkinter (built-in) |
 
 ## 📝 License
 
@@ -217,26 +260,22 @@ This project is open source and free to use for personal and educational purpose
 
 ## 👨‍💻 Author
 
-Created as a personal finance management tool.
+Created as a modern personal finance management tool using Python and CustomTkinter.
 
 ## 🆘 Support & Issues
 
 For issues or suggestions:
 1. Check the **Troubleshooting** section above
 2. Review the code in `__init__.py`
-3. Check Python's [tkinter documentation](https://docs.python.org/3/library/tkinter.html)
+3. Check [CustomTkinter documentation](https://github.com/TomSchimansky/CustomTkinter)
 4. Verify your Python installation
+5. Ensure CustomTkinter is properly installed: `pip list | grep customtkinter`
 
 ## 📞 Quick Tips
 
-💡 **Tip 1**: Keep your salary updated for accurate balance tracking  
-💡 **Tip 2**: Use clear category names for better organization  
-💡 **Tip 3**: Add comments to remember expense details  
-💡 **Tip 4**: Review your expenses regularly for spending patterns  
+💡 **Tip 1**: Keep your salary updated for accurate budget tracking  
+💡 **Tip 2**: Use descriptive comments to remember expense details  
+💡 **Tip 3**: Review your top spending category regularly  
+💡 **Tip 4**: Toggle between light/dark mode based on your preference  
 💡 **Tip 5**: Backup your `expenses_data.json` file regularly  
-
----
-
-**Version**: 1.0  
-**Last Updated**: November 16, 2025  
-**Status**: Active Development ✅
+💡 **Tip 6**: Use the status bar to confirm successful actions  
