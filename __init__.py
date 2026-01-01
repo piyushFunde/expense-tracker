@@ -534,7 +534,21 @@ class ExpenseTracker:
         self.refresh_expense_table()
         self.calculate_total()
         self.update_status("✅ Expense deleted successfully")
-
+    def update_treeview_style(self):
+        style = ttk.Style()
+        if self.dark_mode:
+         style.configure("Treeview", 
+                        background="#2d2d2d", 
+                        foreground="white", 
+                        fieldbackground="#2d2d2d",
+                        bordercolor="#2d2d2d")
+         style.map("Treeview", background=[('selected', '#3498db')])
+       else:
+         style.configure("Treeview", 
+                        background="white", 
+                        foreground="black", 
+                        fieldbackground="white")
+         style.map("Treeview", background=[('selected', '#3498db')])
 
 def main():
     """Main function"""
