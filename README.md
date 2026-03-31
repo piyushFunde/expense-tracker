@@ -8,7 +8,7 @@ A modern, professional desktop application to track your daily expenses, manage 
 ✅ **Dark/Light Mode Toggle** - Switch themes with one click  
 ✅ **Add Expenses** - Record expenses with amount, category dropdown, and comments  
 ✅ **Professional Treeview Table** - View all expenses in organized columns (Amount, Category, Comment, Date)  
-✅ **Data Persistence** - Automatically saves expenses to JSON file  
+✅ **Data Persistence** - Automatically saves expenses to a robust **SQLite database**  
 ✅ **Budget Tracking** - Compare expenses against your salary  
 ✅ **Financial Summary Panel** - Shows total, remaining, percentage, status, and top category  
 ✅ **Real-time Calculations** - Instant total expense and remaining balance updates  
@@ -79,28 +79,20 @@ python3 __init__.py
 
 ## 💾 Data Storage
 
-- Expenses are automatically saved to `expenses_data.json`
-- Data persists between application sessions
-- JSON file is created in the same directory as the application
+- Expenses are automatically saved to an **SQLite database** (`expenses.db`)
+- Data persists between application sessions with high reliability
+- **Migration**: On first run, the app automatically migrates data from `expenses_data.json` to the new database
+- **Security**: Database operations are atomic and protected against corruption
 - No manual save required!
 
-### Sample Data Format
-```json
-[
-  {
-    "expense": 150.50,
-    "category": "Food",
-    "comment": "Lunch at restaurant",
-    "date": "2025-11-17 14:30"
-  },
-  {
-    "expense": 500.00,
-    "category": "Transport",
-    "comment": "Monthly fuel",
-    "date": "2025-11-17 09:15"
-  }
-]
-```
+### Database Schema
+| Column | Type | Description |
+|---|---|---|
+| **id** | INTEGER | Primary Key (Auto-increment) |
+| **expense** | REAL | Transaction amount |
+| **category** | TEXT | Expense category |
+| **comment** | TEXT | Optional notes |
+| **date** | TEXT | ISO Format timestamp |
 
 ## 📁 File Structure
 
@@ -108,9 +100,9 @@ python3 __init__.py
 expense-tracker/
 │
 ├── __init__.py              # Main application file (CustomTkinter implementation)
-├── expenses_data.json       # Auto-generated data file (created on first use)
+├── expenses.db              # SQLite Database (auto-generated)
 ├── README.md               # Documentation (this file)
-└── .gitignore             # Exclude unnecessary files from version control
+└── .gitignore             # Excludes database and private files from GitHub
 ```
 
 ## 🎨 UI Components
@@ -199,10 +191,14 @@ cd "c:\Users\PROGRAMING FILE\expense-tracker"
 python3 __init__.py
 ```
 
-### ❌ JSON file corrupted
-- Delete `expenses_data.json`
-- Restart the application
-- A fresh file will be automatically created
+### ❌ Database Error
+- Ensure you have write permissions in the project folder
+- Check if `expenses.db` is being used by another application
+- If migration failed, check `expenses_data.json.bak` for your original data
+
+### ❌ Resetting the Application
+- Delete `expenses.db` to start with a fresh database
+- If you have an old `expenses_data.json`, the app will attempt to re-migrate it
 
 ### ❌ Data not saving
 - Check folder permissions (right-click → Properties)
