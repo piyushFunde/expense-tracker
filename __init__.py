@@ -1,8 +1,8 @@
 import customtkinter as ctk
 from tkinter import messagebox
 import datetime
-import json
 import os
+import sqlite3
 from tkinter import ttk
 
 # Set appearance mode and color theme
@@ -22,6 +22,7 @@ class ExpenseTracker:
         self.expenses = []
         self.total_expense = 0.0
         self.salary = 0.0
+        self.db_file = "expenses.db"
         self.data_file = "expenses_data.json"
         self.categories = ["Food", "Transport", "Entertainment", "Shopping", "Health", "Education", "Utilities", "Other"]
         
@@ -50,7 +51,8 @@ class ExpenseTracker:
         
         self.current_theme = self.light_theme
         
-        # Load expenses
+        # Setup database and load expenses
+        self.setup_database()
         self.load_expenses()
         
         # Create UI
@@ -304,6 +306,11 @@ class ExpenseTracker:
         self.tree.column("Comment", width=150, anchor="w")
         self.tree.column("Date", width=120, anchor="center")
         
+        # Define hidden ID column
+        self.tree["displaycolumns"] = ("Amount", "Category", "Comment", "Date")
+        self.tree["columns"] = ("Amount", "Category", "Comment", "Date", "ID")
+        self.tree.column("ID", width=0, stretch=False)
+        
         # Define headings
         self.tree.heading("Amount", text="Amount (₹)")
         self.tree.heading("Category", text="Category")
@@ -367,26 +374,62 @@ class ExpenseTracker:
         self.create_ui()
         self.root.after(2000, lambda: self.update_status("✅ Ready"))
 
-    def load_expenses(self):
-        """Load expenses from JSON file"""
-        try:
-            if os.path.exists(self.data_file):
+    def setup_database(self):
+        """Initialize SQLite database and migrate JSON data if necessary"""
+        self.conn = sqlite3.connect(self.db_file)
+        self.cursor = self.conn.cursor()
+        
+        # Create table
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS expenses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                expense REAL NOT NULL,
+                category TEXT NOT NULL,
+                comment TEXT,
+                date TEXT NOT NULL
+            )
+        ''')
+        self.conn.commit()
+        
+        # Migrate from JSON if it exists
+        if os.path.exists(self.data_file):
+            try:
+                import json
                 with open(self.data_file, 'r') as file:
-                    self.expenses = json.load(file)
-            else:
-                self.expenses = []
-        except json.JSONDecodeError:
-            messagebox.showerror("❌ Error", "Corrupted data file. Starting fresh.")
+                    json_data = json.load(file)
+                    for item in json_data:
+                        self.cursor.execute('''
+                            INSERT INTO expenses (expense, category, comment, date)
+                            VALUES (?, ?, ?, ?)
+                        ''', (item['expense'], item['category'], item['comment'], item['date']))
+                self.conn.commit()
+                # Backup and rename JSON file
+                os.rename(self.data_file, self.data_file + ".bak")
+                messagebox.showinfo("✅ Success", "Successfully migrated data to database.")
+            except Exception as e:
+                messagebox.showerror("❌ Migration Error", f"Failed to migrate data: {str(e)}")
+
+    def load_expenses(self):
+        """Load expenses from database"""
+        try:
+            self.cursor.execute('SELECT id, expense, category, comment, date FROM expenses ORDER BY date DESC')
+            rows = self.cursor.fetchall()
+            self.expenses = []
+            for row in rows:
+                self.expenses.append({
+                    "id": row[0],
+                    "expense": row[1],
+                    "category": row[2],
+                    "comment": row[3],
+                    "date": row[4]
+                })
+        except Exception as e:
+            messagebox.showerror("❌ Error", f"Failed to load expenses: {str(e)}")
             self.expenses = []
 
     def save_expenses(self):
-        """Save expenses to JSON file"""
-        try:
-            with open(self.data_file, 'w') as file:
-                json.dump(self.expenses, file, indent=2)
-        except IOError:
-            messagebox.showerror("❌ Error", "Failed to save expenses.")
-            self.update_status("❌ Failed to save")
+        """Placeholder for backward compatibility - saves handled per transaction now"""
+        pass
 
     def refresh_expense_table(self):
         """Refresh the Treeview table"""
@@ -403,7 +446,8 @@ class ExpenseTracker:
                     f"₹{expense['expense']:.2f}",
                     expense['category'],
                     expense['comment'],
-                    expense['date']
+                    expense['date'],
+                    expense['id']
                 )
             )
 
@@ -428,26 +472,27 @@ class ExpenseTracker:
             messagebox.showerror("⚠️ Validation Error", "Please enter a valid number.")
             self.update_status("❌ Invalid input")
             return
-        
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        expense_data = {
-            "expense": expense,
-            "category": category,
-            "comment": comment if comment else "N/A",
-            "date": current_time
-        }
-        
-        self.expenses.append(expense_data)
-        self.save_expenses()
-        self.refresh_expense_table()
-        self.calculate_total()
-        
-        # Clear inputs
-        self.expense_entry.delete(0, "end")
-        self.comment_entry.delete(0, "end")
-        self.category_combo.set(self.categories[0])
-        
-        self.update_status(f"✅ Added ₹{expense:.2f} to {category}")
+        try:
+            self.cursor.execute('''
+                INSERT INTO expenses (expense, category, comment, date)
+                VALUES (?, ?, ?, ?)
+            ''', (expense, category, comment if comment else "N/A", current_time))
+            self.conn.commit()
+            
+            # Reload from DB to stay in sync
+            self.load_expenses()
+            self.refresh_expense_table()
+            self.calculate_total()
+            
+            # Clear inputs
+            self.expense_entry.delete(0, "end")
+            self.comment_entry.delete(0, "end")
+            self.category_combo.set(self.categories[0])
+            
+            self.update_status(f"✅ Added ₹{expense:.2f} to {category}")
+        except Exception as e:
+            messagebox.showerror("❌ Error", f"Failed to save expense: {str(e)}")
 
     def calculate_total(self):
         """Calculate total expenses and update summary"""
@@ -525,15 +570,20 @@ class ExpenseTracker:
         if not response:
             return
         
-        # Get indices and delete in reverse order
-        indices = [self.tree.index(item) for item in selection]
-        for idx in sorted(indices, reverse=True):
-            del self.expenses[idx]
-        
-        self.save_expenses()
-        self.refresh_expense_table()
-        self.calculate_total()
-        self.update_status("✅ Expense deleted successfully")
+        # Get IDs and delete
+        try:
+            for item in selection:
+                # The ID is in the hidden column (index 4)
+                expense_id = self.tree.item(item)['values'][4]
+                self.cursor.execute('DELETE FROM expenses WHERE id = ?', (expense_id,))
+            
+            self.conn.commit()
+            self.load_expenses()
+            self.refresh_expense_table()
+            self.calculate_total()
+            self.update_status("✅ Expense(s) deleted successfully")
+        except Exception as e:
+            messagebox.showerror("❌ Error", f"Failed to delete expense: {str(e)}")
     def update_treeview_style(self):
         style = ttk.Style()
         if self.dark_mode:
@@ -543,7 +593,7 @@ class ExpenseTracker:
                         fieldbackground="#2d2d2d",
                         bordercolor="#2d2d2d")
          style.map("Treeview", background=[('selected', '#3498db')])
-       else:
+        else:
          style.configure("Treeview", 
                         background="white", 
                         foreground="black", 
