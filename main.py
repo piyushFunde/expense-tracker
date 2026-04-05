@@ -30,6 +30,8 @@ class ExpenseTrackerApp:
         self.expenses = []
         self.salary = 0.0
         self.chart_canvas = None
+        self.search_var = ctk.StringVar()
+        self.search_var.trace_add("write", lambda *args: self.refresh_ui_data())
         
         # Setup migrations feedback if any
         migration_status, message = self.db.setup_database()
@@ -196,6 +198,31 @@ class ExpenseTrackerApp:
 
     def create_expense_log(self, parent):
         """Create expense history table"""
+        # Search Frame
+        search_frame = ctk.CTkFrame(parent, fg_color="transparent")
+        search_frame.pack(fill="x", padx=10, pady=(5, 0))
+        
+        ctk.CTkLabel(search_frame, text="🔍 Search:", font=FONT_SMALL_BOLD, text_color=self.current_theme["text"]).pack(side="left", padx=(0, 5))
+        
+        self.search_entry = ctk.CTkEntry(
+            search_frame, 
+            placeholder_text="Search categories or comments...",
+            textvariable=self.search_var,
+            height=30
+        )
+        self.search_entry.pack(side="left", fill="x", expand=True)
+        
+        ctk.CTkButton(
+            search_frame,
+            text="❌",
+            width=30,
+            height=30,
+            command=self.clear_search,
+            fg_color="transparent",
+            hover_color=self.current_theme["bg"],
+            text_color=self.current_theme["text"]
+        ).pack(side="left", padx=(5, 0))
+
         # Treeview frame
         tree_frame = ctk.CTkFrame(parent, fg_color="transparent")
         tree_frame.pack(fill="both", expand=True, padx=10, pady=10)
@@ -329,8 +356,16 @@ class ExpenseTrackerApp:
         # Refresh Table
         for item in self.tree.get_children():
             self.tree.delete(item)
+            
+        search_term = self.search_var.get().lower()
+        
         for exp in self.expenses:
-            self.tree.insert("", "end", values=(f"₹{exp['expense']:.2f}", exp['category'], exp['comment'], exp['date'], exp['id']))
+            # Filter logic: Match Comment or Category
+            match_comment = search_term in exp['comment'].lower()
+            match_category = search_term in exp['category'].lower()
+            
+            if not search_term or match_comment or match_category:
+                self.tree.insert("", "end", values=(f"₹{exp['expense']:.2f}", exp['category'], exp['comment'], exp['date'], exp['id']))
             
         # Refresh Chart
         self.update_chart()
@@ -404,6 +439,11 @@ class ExpenseTrackerApp:
             self.update_status("✅ Deleted successfully")
         except Exception as e:
             messagebox.showerror("❌ Database Error", str(e))
+            
+    def clear_search(self):
+        """Reset search entry and focus it"""
+        self.search_var.set("")
+        self.search_entry.focus()
 
 if __name__ == "__main__":
     root = ctk.CTk()
