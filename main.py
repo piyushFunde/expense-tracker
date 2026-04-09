@@ -1,5 +1,6 @@
 import customtkinter as ctk
-from tkinter import messagebox, ttk
+from tkinter import filedialog, messagebox, ttk
+import csv
 import datetime
 import os
 import matplotlib.pyplot as plt
@@ -270,16 +271,28 @@ class ExpenseTrackerApp:
         self.tree.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        # Delete Selected button
+        button_frame = ctk.CTkFrame(parent, fg_color="transparent")
+        button_frame.pack(fill="x", padx=15, pady=15)
+
         ctk.CTkButton(
-            parent,
+            button_frame,
             text="🗑️ Delete Selected Expense",
             font=FONT_BODY_BOLD,
             height=35,
             command=self.delete_expense,
             fg_color=self.current_theme["danger"],
             hover_color="#c0392b"
-        ).pack(fill="x", padx=15, pady=15)
+        ).pack(side="left", fill="x", expand=True, padx=(0, 7))
+
+        ctk.CTkButton(
+            button_frame,
+            text="⬇️ Export to CSV",
+            font=FONT_BODY_BOLD,
+            height=35,
+            command=self.export_to_csv,
+            fg_color=self.current_theme["secondary"],
+            hover_color="#27ae60"
+        ).pack(side="left", fill="x", expand=True, padx=(7, 0))
 
     def create_analysis_tab(self, parent):
         """Create the analysis tab with charts"""
@@ -418,6 +431,40 @@ class ExpenseTrackerApp:
             self.update_status(f"✅ Added ₹{amount:.2f} to {category}")
         except Exception as e:
             messagebox.showerror("❌ Database Error", str(e))
+
+    def export_to_csv(self):
+        """Export all expense data to a CSV file"""
+        if not self.expenses:
+            messagebox.showinfo("ℹ️ No Data", "There are no expenses to export.")
+            return
+
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv")],
+            initialfile="expenses.csv",
+            title="Save expenses as CSV"
+        )
+
+        if not file_path:
+            return
+
+        try:
+            with open(file_path, mode="w", newline="", encoding="utf-8") as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerow(["Amount (₹)", "Category", "Comment", "Date & Time"])
+                for expense in self.expenses:
+                    writer.writerow([
+                        f"{expense['expense']:.2f}",
+                        expense['category'],
+                        expense['comment'],
+                        expense['date']
+                    ])
+
+            messagebox.showinfo("✅ Export Complete", f"Expenses saved to {os.path.basename(file_path)}")
+            self.update_status(f"✅ Exported {len(self.expenses)} records to CSV")
+        except Exception as e:
+            messagebox.showerror("❌ Export Error", f"Unable to save CSV: {str(e)}")
+            self.update_status("⚠️ Export failed")
 
     def delete_expense(self):
         """Delete selected expense from table and database"""
